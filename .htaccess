@@ -1,0 +1,37 @@
+RewriteEngine On
+RewriteBase /
+
+# Redirecionar para install se nao estiver instalado
+<IfModule mod_rewrite.c>
+    RewriteCond %{REQUEST_URI} !^/install/
+    RewriteCond %{REQUEST_URI} !^/assets/
+    RewriteCond %{REQUEST_URI} !^/uploads/
+    RewriteCond %{REQUEST_FILENAME} !-f
+    RewriteCond %{REQUEST_FILENAME} !-d
+    RewriteRule ^(.*)$ index.php?url=$1 [QSA,L]
+</IfModule>
+
+# Proteger arquivos sensíveis
+<FilesMatch "\.(sql|log|ini|env)$">
+    Order allow,deny
+    Deny from all
+</FilesMatch>
+
+# Desabilitar listagem de diretórios
+Options -Indexes
+
+# Compressão gzip
+<IfModule mod_deflate.c>
+    AddOutputFilterByType DEFLATE text/html text/css text/javascript application/javascript application/json
+</IfModule>
+
+# Cache de arquivos estáticos
+<IfModule mod_expires.c>
+    ExpiresActive On
+    ExpiresByType image/jpeg "access plus 1 month"
+    ExpiresByType image/png "access plus 1 month"
+    ExpiresByType image/gif "access plus 1 month"
+    ExpiresByType image/svg+xml "access plus 1 month"
+    ExpiresByType text/css "access plus 1 week"
+    ExpiresByType application/javascript "access plus 1 week"
+</IfModule>
