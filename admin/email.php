@@ -1,59 +1,67 @@
 <?php
 /**
- * SiteCatalogo - Email (Mailbox / Inbox)
+ * SiteCatalogo - Email (Caixa de Entrada)
  */
 require_once __DIR__ . '/includes/functions.php';
 
-// Verificar se tabela de emails existe, senao criar
-$check = db()->query("SHOW TABLES LIKE '" . table('emails') . "'");
-if ($check->rowCount() === 0) {
-    db()->exec("CREATE TABLE IF NOT EXISTS " . table('emails') . " (
-        id INT AUTO_INCREMENT PRIMARY KEY,
-        remetente_nome VARCHAR(255) DEFAULT '',
-        remetente_email VARCHAR(255) DEFAULT '',
-        destinatario_email VARCHAR(255) DEFAULT '',
-        assunto VARCHAR(500) DEFAULT '',
-        corpo TEXT,
-        corpo_html TEXT,
-        pasta ENUM('inbox','sent','drafts','trash','spam','archive') DEFAULT 'inbox',
-        status ENUM('nao_lido','lido','respondido','encaminhado') DEFAULT 'nao_lido',
-        starred TINYINT(1) DEFAULT 0,
-        anexos TEXT,
-        message_id VARCHAR(255) DEFAULT NULL,
-        in_reply_to VARCHAR(255) DEFAULT NULL,
-        data_envio DATETIME DEFAULT CURRENT_TIMESTAMP,
-        data_recebimento DATETIME DEFAULT NULL,
-        created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-        updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
-        INDEX idx_pasta (pasta),
-        INDEX idx_status (status),
-        INDEX idx_starred (starred),
-        INDEX idx_data (data_envio)
-    ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci");
+// Criar tabela emails se nao existir
+try {
+    $check = db()->query("SHOW TABLES LIKE '" . table('emails') . "'");
+    if ($check->rowCount() === 0) {
+        db()->exec("CREATE TABLE IF NOT EXISTS " . table('emails') . " (
+            id INT AUTO_INCREMENT PRIMARY KEY,
+            remetente_nome VARCHAR(255) DEFAULT '',
+            remetente_email VARCHAR(255) DEFAULT '',
+            destinatario_email VARCHAR(255) DEFAULT '',
+            assunto VARCHAR(500) DEFAULT '',
+            corpo TEXT,
+            corpo_html TEXT,
+            pasta ENUM('inbox','sent','drafts','trash','spam','archive') DEFAULT 'inbox',
+            status ENUM('nao_lido','lido','respondido','encaminhado') DEFAULT 'nao_lido',
+            starred TINYINT(1) DEFAULT 0,
+            anexos TEXT,
+            message_id VARCHAR(255) DEFAULT NULL,
+            in_reply_to VARCHAR(255) DEFAULT NULL,
+            data_envio DATETIME DEFAULT CURRENT_TIMESTAMP,
+            data_recebimento DATETIME DEFAULT NULL,
+            created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+            updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+            INDEX idx_pasta (pasta),
+            INDEX idx_status (status),
+            INDEX idx_starred (starred),
+            INDEX idx_data (data_envio)
+        ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci");
+    }
+} catch (Exception $e) {
+    // Tabela ja existe ou erro de permissao
 }
 
-// Verificar tabela de contas de email
-$check2 = db()->query("SHOW TABLES LIKE '" . table('email_contas') . "'");
-if ($check2->rowCount() === 0) {
-    db()->exec("CREATE TABLE IF NOT EXISTS " . table('email_contas') . " (
-        id INT AUTO_INCREMENT PRIMARY KEY,
-        nome VARCHAR(255) DEFAULT '',
-        email VARCHAR(255) NOT NULL,
-        tipo ENUM('gmail','outlook','yahoo','proprio') DEFAULT 'gmail',
-        imap_host VARCHAR(255) DEFAULT '',
-        imap_port INT DEFAULT 993,
-        imap_secure ENUM('ssl','tls','none') DEFAULT 'ssl',
-        smtp_host VARCHAR(255) DEFAULT '',
-        smtp_port INT DEFAULT 587,
-        smtp_secure ENUM('tls','ssl','none') DEFAULT 'tls',
-        usuario VARCHAR(255) DEFAULT '',
-        senha TEXT,
-        ativo TINYINT(1) DEFAULT 1,
-        padrao TINYINT(1) DEFAULT 0,
-        ultimo_sync DATETIME DEFAULT NULL,
-        created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-        updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
-    ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci");
+// Criar tabela email_contas se nao existir
+try {
+    $check2 = db()->query("SHOW TABLES LIKE '" . table('email_contas') . "'");
+    if ($check2->rowCount() === 0) {
+        db()->exec("CREATE TABLE IF NOT EXISTS " . table('email_contas') . " (
+            id INT AUTO_INCREMENT PRIMARY KEY,
+            nome VARCHAR(255) DEFAULT '',
+            email VARCHAR(255) NOT NULL,
+            tipo ENUM('gmail','outlook','yahoo','proprio') DEFAULT 'gmail',
+            imap_host VARCHAR(255) DEFAULT '',
+            imap_port INT DEFAULT 993,
+            imap_secure ENUM('ssl','tls','none') DEFAULT 'ssl',
+            smtp_host VARCHAR(255) DEFAULT '',
+            smtp_port INT DEFAULT 587,
+            smtp_secure ENUM('tls','ssl','none') DEFAULT 'tls',
+            usuario VARCHAR(255) DEFAULT '',
+            senha TEXT,
+            ativo TINYINT(1) DEFAULT 1,
+            padrao TINYINT(1) DEFAULT 0,
+            ultimo_sync DATETIME DEFAULT NULL,
+            created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+            updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
+        ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci");
+    }
+} catch (Exception $e) {
+    // Tabela ja existe ou erro de permissao
 }
 
 $page_title = 'Email';
@@ -77,7 +85,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['acao'])) {
             if (empty($to) || empty($subject)) {
                 set_flash('error', 'Destinatario e assunto sao obrigatorios!');
             } else {
-                // Salvar na pasta sent
                 $anexos = [];
                 if (!empty($_FILES['attachments']['name'][0])) {
                     foreach ($_FILES['attachments']['name'] as $i => $name) {
@@ -186,43 +193,58 @@ if (isset($_GET['delete']) && $email_id) {
 // ===== CONTAGENS =====
 $counts = [];
 foreach (['inbox','sent','drafts','trash','spam','archive'] as $f) {
-    $counts[$f] = (int)db()->query("SELECT COUNT(*) FROM " . table('emails') . " WHERE pasta = '{$f}'")->fetchColumn();
+    try {
+        $counts[$f] = (int)db()->query("SELECT COUNT(*) FROM " . table('emails') . " WHERE pasta = '{$f}'")->fetchColumn();
+    } catch (Exception $e) {
+        $counts[$f] = 0;
+    }
 }
-$counts['starred'] = (int)db()->query("SELECT COUNT(*) FROM " . table('emails') . " WHERE starred = 1")->fetchColumn();
-$counts['nao_lido'] = (int)db()->query("SELECT COUNT(*) FROM " . table('emails') . " WHERE pasta = 'inbox' AND status = 'nao_lido'")->fetchColumn();
+try {
+    $counts['starred'] = (int)db()->query("SELECT COUNT(*) FROM " . table('emails') . " WHERE starred = 1")->fetchColumn();
+} catch (Exception $e) { $counts['starred'] = 0; }
+try {
+    $counts['nao_lido'] = (int)db()->query("SELECT COUNT(*) FROM " . table('emails') . " WHERE pasta = 'inbox' AND status = 'nao_lido'")->fetchColumn();
+} catch (Exception $e) { $counts['nao_lido'] = 0; }
 
 // ===== LISTAR EMAILS =====
 $emails = [];
 if ($view === 'inbox') {
-    $where = "pasta = ?";
-    $params = [$folder];
-    if ($folder === 'inbox') {
-        $where .= " OR (pasta = 'inbox' AND starred = 1)";
+    try {
+        $stmt = db()->prepare("SELECT * FROM " . table('emails') . " WHERE pasta = ? ORDER BY data_envio DESC LIMIT 50");
+        $stmt->execute([$folder]);
+        $emails = $stmt->fetchAll();
+    } catch (Exception $e) {
+        $emails = [];
     }
-    $stmt = db()->prepare("SELECT * FROM " . table('emails') . " WHERE pasta = ? ORDER BY data_envio DESC LIMIT 50");
-    $stmt->execute([$folder]);
-    $emails = $stmt->fetchAll();
 }
 
 // ===== LER EMAIL =====
 $email_atual = null;
 if ($view === 'read' && $email_id) {
-    $stmt = db()->prepare("SELECT * FROM " . table('emails') . " WHERE id = ?");
-    $stmt->execute([$email_id]);
-    $email_atual = $stmt->fetch();
-    if ($email_atual && $email_atual['status'] === 'nao_lido') {
-        db()->prepare("UPDATE " . table('emails') . " SET status = 'lido' WHERE id = ?")->execute([$email_id]);
+    try {
+        $stmt = db()->prepare("SELECT * FROM " . table('emails') . " WHERE id = ?");
+        $stmt->execute([$email_id]);
+        $email_atual = $stmt->fetch();
+        if ($email_atual && $email_atual['status'] === 'nao_lido') {
+            db()->prepare("UPDATE " . table('emails') . " SET status = 'lido' WHERE id = ?")->execute([$email_id]);
+        }
+    } catch (Exception $e) {
+        $email_atual = null;
     }
 }
 
 // ===== CONTAS DE EMAIL =====
-$contas = db()->query("SELECT * FROM " . table('email_contas') . " WHERE ativo = 1 ORDER BY padrao DESC, nome")->fetchAll();
+try {
+    $contas = db()->query("SELECT * FROM " . table('email_contas') . " WHERE ativo = 1 ORDER BY padrao DESC, nome")->fetchAll();
+} catch (Exception $e) {
+    $contas = [];
+}
 
 require_once __DIR__ . '/includes/header.php';
 ?>
 
 <style>
-/* ===== LAYOUT DO EMAIL (Mailbox) ===== */
+/* ===== LAYOUT DO EMAIL ===== */
 .email-wrapper {
     display: flex;
     gap: 0;
@@ -233,7 +255,6 @@ require_once __DIR__ . '/includes/header.php';
     overflow: hidden;
 }
 
-/* Sidebar */
 .email-sidebar {
     width: 260px;
     background: #f8fafc;
@@ -330,7 +351,6 @@ require_once __DIR__ . '/includes/header.php';
     border-radius: 50%;
 }
 
-/* Main Content */
 .email-main {
     flex: 1;
     min-width: 0;
@@ -385,7 +405,6 @@ require_once __DIR__ . '/includes/header.php';
     font-size: 0.8rem;
 }
 
-/* Email List */
 .email-list {
     flex: 1;
     overflow-y: auto;
@@ -428,6 +447,7 @@ require_once __DIR__ . '/includes/header.php';
     flex-shrink: 0;
     cursor: pointer;
     transition: color 0.15s;
+    text-decoration: none;
 }
 
 .email-item .star-btn.starred {
@@ -512,7 +532,6 @@ require_once __DIR__ . '/includes/header.php';
     font-size: 0.8rem;
 }
 
-/* Read View */
 .email-read-header {
     padding: 20px;
     border-bottom: 1px solid #e2e8f0;
@@ -673,9 +692,9 @@ require_once __DIR__ . '/includes/header.php';
     background: #fff;
     color: #64748b;
     cursor: pointer;
+    text-decoration: none;
 }
 
-/* Compose Form */
 .compose-form {
     padding: 20px;
 }
@@ -747,7 +766,6 @@ require_once __DIR__ . '/includes/header.php';
     border-top: 1px solid #e2e8f0;
 }
 
-/* Config Panel */
 .config-panel {
     padding: 24px;
     max-width: 800px;
@@ -803,7 +821,6 @@ require_once __DIR__ . '/includes/header.php';
     gap: 6px;
 }
 
-/* Auto-config helper */
 .auto-config-box {
     background: #eff6ff;
     border: 1px solid #bfdbfe;
@@ -831,7 +848,6 @@ require_once __DIR__ . '/includes/header.php';
     gap: 12px;
 }
 
-/* Responsive */
 @media (max-width: 768px) {
     .email-wrapper {
         flex-direction: column;
@@ -873,45 +889,45 @@ require_once __DIR__ . '/includes/header.php';
     <!-- SIDEBAR -->
     <aside class="email-sidebar">
         <a href="email.php?view=compose" class="btn btn-primary compose-btn">
-            <i class="fas fa-pen"></i> Compose
+            <i class="fas fa-pen"></i> Escrever
         </a>
 
         <div class="nav-section">
-            <div class="nav-title">Folders</div>
+            <div class="nav-title">Pastas</div>
             <a href="email.php?view=inbox&folder=inbox" class="nav-item <?php echo $folder === 'inbox' && $view === 'inbox' ? 'active' : ''; ?>">
-                <i class="fas fa-inbox"></i> Inbox
+                <i class="fas fa-inbox"></i> Caixa de Entrada
                 <?php if ($counts['nao_lido'] > 0): ?>
                 <span class="badge-count"><?php echo $counts['nao_lido']; ?></span>
                 <?php endif; ?>
             </a>
             <a href="email.php?view=inbox&folder=sent" class="nav-item <?php echo $folder === 'sent' ? 'active' : ''; ?>">
-                <i class="fas fa-paper-plane"></i> Sent
+                <i class="fas fa-paper-plane"></i> Enviados
             </a>
             <a href="email.php?view=inbox&folder=drafts" class="nav-item <?php echo $folder === 'drafts' ? 'active' : ''; ?>">
-                <i class="fas fa-file-alt"></i> Drafts
+                <i class="fas fa-file-alt"></i> Rascunhos
                 <?php if ($counts['drafts'] > 0): ?>
                 <span class="badge-count" style="background:#64748b;"><?php echo $counts['drafts']; ?></span>
                 <?php endif; ?>
             </a>
             <a href="email.php?view=inbox&folder=starred" class="nav-item <?php echo $folder === 'starred' ? 'active' : ''; ?>">
-                <i class="fas fa-star"></i> Starred
+                <i class="fas fa-star"></i> Com Estrela
             </a>
             <a href="email.php?view=inbox&folder=archive" class="nav-item <?php echo $folder === 'archive' ? 'active' : ''; ?>">
-                <i class="fas fa-archive"></i> Archive
+                <i class="fas fa-archive"></i> Arquivados
             </a>
             <a href="email.php?view=inbox&folder=spam" class="nav-item <?php echo $folder === 'spam' ? 'active' : ''; ?>">
                 <i class="fas fa-exclamation-circle"></i> Spam
             </a>
             <a href="email.php?view=inbox&folder=trash" class="nav-item <?php echo $folder === 'trash' ? 'active' : ''; ?>">
-                <i class="fas fa-trash"></i> Trash
+                <i class="fas fa-trash"></i> Lixeira
             </a>
         </div>
 
         <div class="nav-section labels-section">
-            <div class="nav-title">Labels</div>
-            <div class="label-item"><span class="label-dot" style="background:#3b82f6;"></span> Customer</div>
-            <div class="label-item"><span class="label-dot" style="background:#10b981;"></span> Billing</div>
-            <div class="label-item"><span class="label-dot" style="background:#f59e0b;"></span> Internal</div>
+            <div class="nav-title">Etiquetas</div>
+            <div class="label-item"><span class="label-dot" style="background:#3b82f6;"></span> Cliente</div>
+            <div class="label-item"><span class="label-dot" style="background:#10b981;"></span> Financeiro</div>
+            <div class="label-item"><span class="label-dot" style="background:#f59e0b;"></span> Interno</div>
         </div>
 
         <div class="nav-section" style="margin-top: 16px; padding-top: 16px; border-top: 1px solid #e2e8f0;">
@@ -925,20 +941,20 @@ require_once __DIR__ . '/includes/header.php';
     <main class="email-main">
 
         <?php if ($view === 'compose'): ?>
-        <!-- ===== COMPOSE ===== -->
+        <!-- ===== ESCREVER ===== -->
         <div class="email-toolbar">
-            <h3 style="font-size: 1rem; font-weight: 600; color: #0f172a;">Compose Message</h3>
+            <h3 style="font-size: 1rem; font-weight: 600; color: #0f172a;">Escrever Mensagem</h3>
             <div style="margin-left: auto; font-size: 0.8rem; color: #94a3b8;">
-                <a href="email.php" style="color: #3b82f6; text-decoration: none;">Home</a> / 
-                <a href="email.php" style="color: #3b82f6; text-decoration: none;">Mailbox</a> / 
-                <span>Compose</span>
+                <a href="email.php" style="color: #3b82f6; text-decoration: none;">Inicio</a> /
+                <a href="email.php" style="color: #3b82f6; text-decoration: none;">Caixa de Entrada</a> /
+                <span>Escrever</span>
             </div>
         </div>
         <form method="POST" enctype="multipart/form-data" class="compose-form">
             <input type="hidden" name="acao" value="enviar">
 
             <div class="form-group">
-                <label>From</label>
+                <label>De</label>
                 <select name="conta_id">
                     <?php foreach ($contas as $c): ?>
                     <option value="<?php echo $c['id']; ?>"><?php echo sanitize($c['nome'] ?: $c['email']); ?></option>
@@ -950,8 +966,8 @@ require_once __DIR__ . '/includes/header.php';
             </div>
 
             <div class="form-group">
-                <label>To</label>
-                <input type="email" name="to" placeholder="recipient@example.com" required>
+                <label>Para</label>
+                <input type="email" name="to" placeholder="destinatario@exemplo.com" required>
             </div>
 
             <div class="form-row-2">
@@ -960,60 +976,59 @@ require_once __DIR__ . '/includes/header.php';
                     <input type="text" name="cc" placeholder="">
                 </div>
                 <div class="form-group">
-                    <label>Bcc</label>
+                    <label>Cco</label>
                     <input type="text" name="bcc" placeholder="">
                 </div>
             </div>
 
             <div class="form-group">
-                <label>Subject</label>
+                <label>Assunto</label>
                 <input type="text" name="subject" placeholder="">
             </div>
 
             <div class="form-group">
-                <label>Message</label>
-                <textarea name="message" placeholder="Write your message..."></textarea>
-                <small style="color: #94a3b8; font-size: 0.75rem;">Hook up a rich text editor such as <a href="#" style="color: #3b82f6;">Quill</a> or <a href="#" style="color: #3b82f6;">EasyMDE</a> to upgrade this textarea.</small>
+                <label>Mensagem</label>
+                <textarea name="message" placeholder="Escreva sua mensagem..."></textarea>
             </div>
 
             <div class="form-group">
-                <label>Attachments</label>
+                <label>Anexos</label>
                 <div class="attachment-input">
                     <input type="file" name="attachments[]" multiple id="attachmentInput">
-                    <span id="attachmentLabel" style="color: #64748b; font-size: 0.85rem;">Nenhum ficheiro selecionado</span>
+                    <span id="attachmentLabel" style="color: #64748b; font-size: 0.85rem;">Nenhum arquivo selecionado</span>
                 </div>
             </div>
 
             <div class="form-actions-compose">
-                <button type="submit" class="btn btn-primary"><i class="fas fa-paper-plane"></i> Send</button>
-                <button type="button" class="btn btn-secondary" onclick="history.back()"><i class="fas fa-save"></i> Save draft</button>
-                <a href="email.php" class="btn btn-danger" style="margin-left: auto;"><i class="fas fa-times"></i> Discard</a>
+                <button type="submit" class="btn btn-primary"><i class="fas fa-paper-plane"></i> Enviar</button>
+                <button type="button" class="btn btn-secondary" onclick="history.back()"><i class="fas fa-save"></i> Salvar rascunho</button>
+                <a href="email.php" class="btn btn-danger" style="margin-left: auto;"><i class="fas fa-times"></i> Descartar</a>
             </div>
         </form>
 
         <?php elseif ($view === 'read' && $email_atual): ?>
-        <!-- ===== READ EMAIL ===== -->
+        <!-- ===== LER EMAIL ===== -->
         <div class="email-read-header">
             <div class="read-actions">
                 <a href="email.php?view=inbox&folder=<?php echo $folder; ?>" class="btn btn-secondary"><i class="fas fa-arrow-left"></i> Voltar</a>
-                <a href="email.php?view=compose&reply=<?php echo $email_atual['id']; ?>" class="btn btn-primary"><i class="fas fa-reply"></i> Reply</a>
-                <a href="email.php?view=compose&forward=<?php echo $email_atual['id']; ?>" class="btn btn-secondary"><i class="fas fa-share"></i> Forward</a>
-                <a href="?move=archive&id=<?php echo $email_atual['id']; ?>&folder=<?php echo $folder; ?>" class="btn btn-secondary"><i class="fas fa-archive"></i> Archive</a>
-                <a href="?delete=1&id=<?php echo $email_atual['id']; ?>&folder=<?php echo $folder; ?>" class="btn btn-danger" onclick="return confirm('Mover para lixeira?')"><i class="fas fa-trash"></i> Delete</a>
+                <a href="email.php?view=compose&reply=<?php echo $email_atual['id']; ?>" class="btn btn-primary"><i class="fas fa-reply"></i> Responder</a>
+                <a href="email.php?view=compose&forward=<?php echo $email_atual['id']; ?>" class="btn btn-secondary"><i class="fas fa-share"></i> Encaminhar</a>
+                <a href="?move=archive&id=<?php echo $email_atual['id']; ?>&folder=<?php echo $folder; ?>" class="btn btn-secondary"><i class="fas fa-archive"></i> Arquivar</a>
+                <a href="?delete=1&id=<?php echo $email_atual['id']; ?>&folder=<?php echo $folder; ?>" class="btn btn-danger" onclick="return confirm('Mover para lixeira?')"><i class="fas fa-trash"></i> Excluir</a>
             </div>
 
             <h2><?php echo sanitize($email_atual['assunto'] ?: '(Sem assunto)'); ?></h2>
 
             <div class="email-read-sender">
                 <div class="sender-avatar">
-                    <?php 
+                    <?php
                     $nome = $email_atual['remetente_nome'] ?: $email_atual['remetente_email'];
-                    echo strtoupper(substr($nome, 0, 2)); 
+                    echo strtoupper(substr($nome, 0, 2));
                     ?>
                 </div>
                 <div class="sender-info">
                     <div class="sender-name"><?php echo sanitize($email_atual['remetente_nome'] ?: 'Desconhecido'); ?></div>
-                    <div class="sender-email"><?php echo sanitize($email_atual['remetente_email']); ?> — to me</div>
+                    <div class="sender-email"><?php echo sanitize($email_atual['remetente_email']); ?> — para mim</div>
                 </div>
                 <div class="email-date-full"><?php echo format_date($email_atual['data_envio'], 'd/m/Y H:i'); ?></div>
             </div>
@@ -1023,14 +1038,14 @@ require_once __DIR__ . '/includes/header.php';
             <?php echo nl2br(sanitize($email_atual['corpo'])); ?>
         </div>
 
-        <?php 
+        <?php
         $anexos = json_decode($email_atual['anexos'] ?? '[]', true);
-        if (!empty($anexos)): 
+        if (!empty($anexos)):
         ?>
         <div class="email-attachments">
-            <h4><i class="fas fa-paperclip"></i> Attachments (<?php echo count($anexos); ?>)</h4>
+            <h4><i class="fas fa-paperclip"></i> Anexos (<?php echo count($anexos); ?>)</h4>
             <div class="attachment-list">
-                <?php foreach ($anexos as $anexo): 
+                <?php foreach ($anexos as $anexo):
                     $ext = pathinfo($anexo, PATHINFO_EXTENSION);
                     $icon = in_array($ext, ['pdf']) ? 'fa-file-pdf' : (in_array($ext, ['jpg','jpeg','png','gif']) ? 'fa-file-image' : 'fa-file');
                     $size = file_exists(__DIR__ . '/uploads/' . $anexo) ? round(filesize(__DIR__ . '/uploads/' . $anexo) / 1024, 1) . ' KB' : '';
@@ -1126,7 +1141,7 @@ require_once __DIR__ . '/includes/header.php';
 
                 <div class="form-row-2">
                     <div class="form-group">
-                        <label>Senha / App Password *</label>
+                        <label>Senha / Senha de App *</label>
                         <input type="password" name="senha" value="<?php echo sanitize($conta_edit['senha'] ?? ''); ?>" placeholder="Senha de aplicativo">
                     </div>
                     <div class="form-group">
@@ -1193,7 +1208,7 @@ require_once __DIR__ . '/includes/header.php';
         </div>
 
         <?php else: ?>
-        <!-- ===== INBOX LIST ===== -->
+        <!-- ===== LISTA DE EMAILS ===== -->
         <div class="email-toolbar">
             <div class="toolbar-btn"><input type="checkbox" id="selectAll"></div>
             <button class="toolbar-btn" onclick="location.reload()"><i class="fas fa-sync-alt"></i></button>
@@ -1201,9 +1216,9 @@ require_once __DIR__ . '/includes/header.php';
             <button class="toolbar-btn"><i class="fas fa-trash"></i></button>
             <div class="toolbar-search">
                 <i class="fas fa-search"></i>
-                <input type="text" placeholder="Search mail...">
+                <input type="text" placeholder="Buscar email...">
             </div>
-            <span style="margin-left: auto; font-size: 0.8rem; color: #94a3b8;">1-<?php echo min(50, count($emails)); ?> of <?php echo count($emails); ?></span>
+            <span style="margin-left: auto; font-size: 0.8rem; color: #94a3b8;">1-<?php echo min(50, count($emails)); ?> de <?php echo count($emails); ?></span>
         </div>
 
         <div class="email-list">
@@ -1213,7 +1228,7 @@ require_once __DIR__ . '/includes/header.php';
                 <p>Caixa de entrada vazia</p>
             </div>
             <?php else: ?>
-            <?php foreach ($emails as $e): 
+            <?php foreach ($emails as $e):
                 $is_unread = $e['status'] === 'nao_lido';
                 $initials = strtoupper(substr($e['remetente_nome'] ?: $e['remetente_email'], 0, 2));
                 $has_attach = !empty($e['anexos']) && $e['anexos'] !== '[]';
@@ -1246,7 +1261,6 @@ require_once __DIR__ . '/includes/header.php';
 </div>
 
 <script>
-// Auto-preencher configuracoes baseado no provedor
 function autoPreencherConfig() {
     const tipo = document.getElementById('tipoProvedor').value;
     const email = document.getElementById('configEmail').value;
@@ -1304,12 +1318,10 @@ function autoPreencherConfig() {
     document.getElementById('smtpPort').value = cfg.smtpPort;
     document.getElementById('smtpSecure').value = cfg.smtpSecure;
 
-    // Se tiver email preenchido, usar como usuario
     if (email) {
         document.getElementById('configUsuario').value = email;
     }
 
-    // Se for dominio proprio, tentar detectar pelo dominio
     if (tipo === 'proprio' && email) {
         const domain = email.split('@')[1];
         if (domain) {
@@ -1319,16 +1331,15 @@ function autoPreencherConfig() {
     }
 }
 
-// Preview de anexos no compose
 document.getElementById('attachmentInput').addEventListener('change', function(e) {
     const files = e.target.files;
     const label = document.getElementById('attachmentLabel');
     if (files.length === 0) {
-        label.textContent = 'Nenhum ficheiro selecionado';
+        label.textContent = 'Nenhum arquivo selecionado';
     } else if (files.length === 1) {
         label.textContent = files[0].name;
     } else {
-        label.textContent = files.length + ' ficheiros selecionados';
+        label.textContent = files.length + ' arquivos selecionados';
     }
 });
 </script>

@@ -6,6 +6,15 @@ $admin_nome = $_SESSION['admin_nome'] ?? 'Admin';
 $admin_nivel = $_SESSION['admin_nivel'] ?? 'admin';
 $admin_avatar = $_SESSION['admin_avatar'] ?? '';
 $orcamentos_pendentes = count_orcamentos_pendentes();
+
+// Emails nao lidos
+$emails_nao_lidos = 0;
+try {
+    $emails_nao_lidos = (int)db()->query("SELECT COUNT(*) FROM " . table('emails') . " WHERE pasta = 'inbox' AND status = 'nao_lido'")->fetchColumn();
+} catch (Exception $e) {
+    $emails_nao_lidos = 0;
+}
+
 $site_name = get_config('site_name', 'SiteCatalogo');
 ?>
 <!DOCTYPE html>
@@ -35,15 +44,15 @@ $site_name = get_config('site_name', 'SiteCatalogo');
                 <i class="fas fa-times"></i>
             </button>
         </div>
-        
+
         <nav class="sidebar-nav">
             <a href="./" class="nav-link <?php echo active_class($current_page, 'index'); ?>">
                 <i class="fas fa-chart-pie"></i>
                 <span>Dashboard</span>
             </a>
-            
+
             <div class="nav-divider"></div>
-            
+
             <a href="produtos.php" class="nav-link <?php echo active_class($current_page, 'produtos'); ?>">
                 <i class="fas fa-box-open"></i>
                 <span>Produtos</span>
@@ -60,9 +69,9 @@ $site_name = get_config('site_name', 'SiteCatalogo');
                 <i class="fas fa-image"></i>
                 <span>Banners</span>
             </a>
-            
+
             <div class="nav-divider"></div>
-            
+
             <a href="orcamentos.php" class="nav-link <?php echo active_class($current_page, 'orcamentos'); ?>">
                 <i class="fas fa-file-invoice-dollar"></i>
                 <span>Orcamentos</span>
@@ -74,9 +83,19 @@ $site_name = get_config('site_name', 'SiteCatalogo');
                 <i class="fas fa-users"></i>
                 <span>Clientes</span>
             </a>
-            
+
             <div class="nav-divider"></div>
-            
+
+            <a href="email.php" class="nav-link <?php echo active_class($current_page, 'email'); ?>">
+                <i class="fas fa-envelope"></i>
+                <span>Email</span>
+                <?php if ($emails_nao_lidos > 0): ?>
+                <span class="nav-badge"><?php echo $emails_nao_lidos; ?></span>
+                <?php endif; ?>
+            </a>
+
+            <div class="nav-divider"></div>
+
             <a href="usuarios.php" class="nav-link <?php echo active_class($current_page, 'usuarios'); ?>">
                 <i class="fas fa-user-shield"></i>
                 <span>Usuarios</span>
@@ -90,7 +109,7 @@ $site_name = get_config('site_name', 'SiteCatalogo');
                 <span>SEO</span>
             </a>
         </nav>
-        
+
         <div class="sidebar-footer">
             <a href="../" target="_blank" class="nav-link">
                 <i class="fas fa-external-link-alt"></i>
@@ -102,7 +121,7 @@ $site_name = get_config('site_name', 'SiteCatalogo');
             </a>
         </div>
     </aside>
-    
+
     <!-- Main -->
     <div class="admin-main">
         <!-- Topbar -->
@@ -110,7 +129,7 @@ $site_name = get_config('site_name', 'SiteCatalogo');
             <button class="menu-toggle" id="menuToggle">
                 <i class="fas fa-bars"></i>
             </button>
-            
+
             <div class="topbar-right">
                 <div class="dropdown">
                     <button class="user-menu" id="userMenu">
@@ -134,7 +153,7 @@ $site_name = get_config('site_name', 'SiteCatalogo');
                 </div>
             </div>
         </header>
-        
+
         <!-- Page Content -->
         <div class="admin-content">
             <?php echo show_flash(); ?>

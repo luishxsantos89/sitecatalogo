@@ -15,7 +15,7 @@ if (file_exists(ROOT_PATH . '/config.php')) {
 
 class Database {
     private static ?PDO $instance = null;
-    
+
     public static function getInstance(): PDO {
         if (self::$instance === null) {
             try {
@@ -23,7 +23,7 @@ class Database {
                 $name = defined('DB_NAME') ? DB_NAME : '';
                 $user = defined('DB_USER') ? DB_USER : '';
                 $pass = defined('DB_PASS') ? DB_PASS : '';
-                
+
                 self::$instance = new PDO(
                     "mysql:host={$host};dbname={$name};charset=utf8mb4",
                     $user,
@@ -41,12 +41,12 @@ class Database {
         }
         return self::$instance;
     }
-    
+
     public static function prefix(string $table): string {
         $prefix = defined('DB_PREFIX') ? DB_PREFIX : 'sc_';
         return $prefix . $table;
     }
-    
+
     // Evitar clone
     private function __clone() {}
 }

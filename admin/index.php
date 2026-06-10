@@ -7,6 +7,14 @@ $page_title = 'Dashboard';
 
 $counts = get_counts();
 
+// Emails nao lidos
+$emails_novos = 0;
+try {
+    $emails_novos = (int)db()->query("SELECT COUNT(*) FROM " . table('emails') . " WHERE pasta = 'inbox' AND status = 'nao_lido'")->fetchColumn();
+} catch (Exception $e) {
+    $emails_novos = 0;
+}
+
 // Ultimos orcamentos
 $stmt = db()->query("SELECT o.*, 
     (SELECT COUNT(*) FROM " . table('orcamento_itens') . " WHERE orcamento_id = o.id) as total_itens 
@@ -81,6 +89,15 @@ require_once __DIR__ . '/includes/header.php';
         </div>
     </div>
     <div class="stat-card">
+        <div class="stat-icon blue">
+            <i class="fas fa-envelope"></i>
+        </div>
+        <div class="stat-info">
+            <span class="stat-number"><?php echo $emails_novos; ?></span>
+            <span class="stat-label">Emails Novos</span>
+        </div>
+    </div>
+    <div class="stat-card">
         <div class="stat-icon red">
             <i class="fas fa-exclamation-triangle"></i>
         </div>
@@ -138,7 +155,7 @@ require_once __DIR__ . '/includes/header.php';
             <?php endif; ?>
         </div>
     </div>
-    
+
     <!-- Estoque Baixo -->
     <div class="card">
         <div class="card-header">

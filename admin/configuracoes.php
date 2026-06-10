@@ -61,14 +61,16 @@ if ((int)$exists->fetchColumn() === 0) {
         ->execute([json_encode(['imagem_texto' => 'Logo + Nome', 'imagem' => 'Apenas Logo', 'texto' => 'Apenas Nome']), 'navbar_tipo']);
 }
 
-$configuracoes = db()->query("SELECT * FROM " . table('configuracoes') . " WHERE ativo = 1 ORDER BY 
+// Buscar configuracoes EXCETO as de email (movidas para pagina Email)
+$configuracoes = db()->query("SELECT * FROM " . table('configuracoes') . " 
+    WHERE ativo = 1 AND grupo != 'email' 
+    ORDER BY 
     CASE 
         WHEN grupo = 'geral' THEN 1
         WHEN grupo = 'contato' THEN 2
-        WHEN grupo = 'email' THEN 3
-        WHEN grupo = 'social' THEN 4
-        WHEN grupo = 'aparencia' THEN 5
-        ELSE 6
+        WHEN grupo = 'social' THEN 3
+        WHEN grupo = 'aparencia' THEN 4
+        ELSE 5
     END, ordem, id")->fetchAll();
 
 require_once __DIR__ . '/includes/header.php';
@@ -102,9 +104,6 @@ require_once __DIR__ . '/includes/header.php';
                 <div class="form-group">
                     <label for="cfg_<?php echo $cfg['chave']; ?>">
                         <?php echo sanitize($cfg['descricao'] ?: $cfg['chave']); ?>
-                        <?php if ($cfg['chave'] === 'email_smtp_pass'): ?>
-                        <i class="fas fa-lock" style="color: #ef4444; margin-left: 4px;" title="Campo sensivel"></i>
-                        <?php endif; ?>
                     </label>
                     <?php if ($cfg['tipo'] === 'textarea'): ?>
                     <textarea id="cfg_<?php echo $cfg['chave']; ?>" name="config[<?php echo $cfg['chave']; ?>]" rows="3"><?php echo sanitize($cfg['valor']); ?></textarea>
@@ -129,15 +128,10 @@ require_once __DIR__ . '/includes/header.php';
                     <?php elseif ($cfg['tipo'] === 'number'): ?>
                     <input type="number" id="cfg_<?php echo $cfg['chave']; ?>" name="config[<?php echo $cfg['chave']; ?>]" value="<?php echo (int)$cfg['valor']; ?>">
                     <?php else: ?>
-                    <input type="<?php echo $cfg['chave'] === 'email_smtp_pass' ? 'password' : 'text'; ?>" id="cfg_<?php echo $cfg['chave']; ?>" name="config[<?php echo $cfg['chave']; ?>]" value="<?php echo sanitize($cfg['valor']); ?>" placeholder="<?php 
+                    <input type="text" id="cfg_<?php echo $cfg['chave']; ?>" name="config[<?php echo $cfg['chave']; ?>]" value="<?php echo sanitize($cfg['valor']); ?>" placeholder="<?php 
                         $placeholders = [
-                            'email_smtp_host' => 'smtp.gmail.com, smtp.office365.com, smtp.mail.yahoo.com',
-                            'email_smtp_port' => '587 (Gmail/Outlook), 465 (Yahoo), 25',
-                            'email_smtp_user' => 'seuemail@gmail.com',
-                            'email_smtp_pass' => 'Senha de app (nao a senha normal)',
-                            'email_smtp_secure' => 'tls ou ssl',
-                            'email_from_name' => 'Nome que aparece no e-mail enviado',
-                            'email_from_email' => 'seuemail@gmail.com',
+                            'whatsapp' => '55 + DDD + Numero (somente numeros)',
+                            'email_contato' => 'contato@empresa.com',
                         ];
                         echo $placeholders[$cfg['chave']] ?? '';
                     ?>">
@@ -145,9 +139,6 @@ require_once __DIR__ . '/includes/header.php';
                     <?php 
                     $helps = [
                         'whatsapp' => 'Formato: 55 + DDD + Numero (somente numeros)',
-                        'email_smtp_host' => 'Gmail: smtp.gmail.com | Outlook: smtp.office365.com | Yahoo: smtp.mail.yahoo.com',
-                        'email_smtp_port' => 'Gmail/Outlook: 587 | Yahoo: 465 | Use TLS para 587, SSL para 465',
-                        'email_smtp_pass' => 'IMPORTANTE: Use "Senha de App", nao a senha normal da conta!',
                         'mostrar_preco' => 'Se definido como "Nao", precos e estoque nao serao exibidos no site publico',
                     ];
                     if (isset($helps[$cfg['chave']])): ?>
@@ -174,18 +165,11 @@ require_once __DIR__ . '/includes/header.php';
     gap: 16px;
 }
 
-/* Campos que devem ocupar largura total (textarea, file com preview) */
 .form-row-3cols .form-group:has(textarea),
 .form-row-3cols .form-group:has(input[type="file"]) {
     grid-column: 1 / -1;
 }
 
-/* Campos de email em grupo ocupam mais espaco */
-.form-row-3cols .form-group:has(input[name*="email_smtp"]) {
-    grid-column: span 1;
-}
-
-/* Tablet: 2 colunas */
 @media (max-width: 1024px) {
     .form-row-3cols {
         grid-template-columns: repeat(2, 1fr);
@@ -196,7 +180,6 @@ require_once __DIR__ . '/includes/header.php';
     }
 }
 
-/* Mobile: 1 coluna */
 @media (max-width: 640px) {
     .form-row-3cols {
         grid-template-columns: 1fr;
@@ -204,18 +187,6 @@ require_once __DIR__ . '/includes/header.php';
     .form-row-3cols .form-group {
         grid-column: 1 / -1 !important;
     }
-}
-
-/* Ajuste para campos de email ficarem organizados */
-.form-row-3cols .form-group:has(input[name="config[email_smtp_host]"]),
-.form-row-3cols .form-group:has(input[name="config[email_smtp_port]"]),
-.form-row-3cols .form-group:has(input[name="config[email_smtp_secure]"]) {
-    grid-column: span 1;
-}
-
-.form-row-3cols .form-group:has(input[name="config[email_smtp_user]"]),
-.form-row-3cols .form-group:has(input[name="config[email_smtp_pass]"]) {
-    grid-column: span 1;
 }
 </style>
 
