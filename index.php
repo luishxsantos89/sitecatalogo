@@ -776,7 +776,7 @@ if ($busca) {
                 <h2 style="font-size: 1.75rem; font-weight: 700; color: #0f172a; margin-bottom: 8px;">Entre em Contato</h2>
                 <p style="color: #64748b; font-size: 1rem;">Solicite um orcamento ou tire suas duvidas conosco.</p>
             </div>
-            <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 24px; max-width: 1200px; margin: 0 auto;">
+            <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 24px; margin: 0 auto;">
                 <div style="background: white; border-radius: 12px; padding: 24px; box-shadow: 0 1px 3px rgba(0,0,0,0.1);">
                     <h3 style="font-size: 1.125rem; font-weight: 600; color: #0f172a; margin-bottom: 20px;"><i class="fas fa-building" style="color: #3b82f6; margin-right: 8px;"></i> Nossos Dados</h3>
                     <div style="display: flex; flex-direction: column; gap: 16px;">

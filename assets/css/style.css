@@ -264,7 +264,7 @@ a:hover {
 .search-form {
     display: flex;
     gap: 10px;
-    max-width: 640px;
+    max-width: 100%;
 }
 
 .search-input-wrap {

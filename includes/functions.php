@@ -7,7 +7,8 @@ require_once __DIR__ . '/db.php';
 
 // ==================== SEGURANCA ====================
 
-function sanitize(string $data): string {
+function sanitize($data): string {
+    if ($data === null) return '';
     return htmlspecialchars(strip_tags(trim($data)), ENT_QUOTES, 'UTF-8');
 }
 
