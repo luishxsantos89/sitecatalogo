@@ -1,7 +1,10 @@
 <?php
 /**
  * SiteCatalogo - Produtos (CRUD)
+<<<<<<< HEAD
  * CORRIGIDO: Removidas colunas que nao existem no banco
+=======
+>>>>>>> 8561693cd0ec14eb8341364e3af39ea63aae5359
  */
 require_once __DIR__ . '/includes/functions.php';
 $page_title = 'Produtos';
@@ -12,23 +15,51 @@ $id = isset($_GET['id']) ? (int)$_GET['id'] : 0;
 // Processar form
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $acao = $_POST['acao'] ?? '';
+<<<<<<< HEAD
 
+=======
+    
+>>>>>>> 8561693cd0ec14eb8341364e3af39ea63aae5359
     if ($acao === 'salvar') {
         $dados = [
             'nome' => trim($_POST['nome'] ?? ''),
             'slug' => slugify(trim($_POST['nome'] ?? '')),
+<<<<<<< HEAD
             'descricao' => trim($_POST['descricao_completa'] ?? ''),
             'descricao_curta' => trim($_POST['descricao_curta'] ?? ''),
             'sku' => trim($_POST['sku'] ?? ''),
             'preco' => str_replace(',', '.', $_POST['preco'] ?? 0),
             'preco_promocional' => !empty($_POST['preco_promocional']) ? str_replace(',', '.', $_POST['preco_promocional']) : null,
+=======
+            'descricao_curta' => trim($_POST['descricao_curta'] ?? ''),
+            'descricao_completa' => trim($_POST['descricao_completa'] ?? ''),
+            'sku' => trim($_POST['sku'] ?? ''),
+            'preco' => str_replace(',', '.', $_POST['preco'] ?? 0),
+            'preco_promocional' => !empty($_POST['preco_promocional']) ? str_replace(',', '.', $_POST['preco_promocional']) : null,
+            'custo' => !empty($_POST['custo']) ? str_replace(',', '.', $_POST['custo']) : null,
+            'unidade' => $_POST['unidade'] ?? 'un',
+            'peso' => $_POST['peso'] ?: null,
+            'largura' => !empty($_POST['largura']) ? str_replace(',', '.', $_POST['largura']) : null,
+            'altura' => !empty($_POST['altura']) ? str_replace(',', '.', $_POST['altura']) : null,
+            'mt2' => !empty($_POST['mt2']) ? str_replace(',', '.', $_POST['mt2']) : null,
+>>>>>>> 8561693cd0ec14eb8341364e3af39ea63aae5359
             'quantidade_estoque' => (int)($_POST['quantidade_estoque'] ?? 0),
             'estoque_minimo' => (int)($_POST['estoque_minimo'] ?? 0),
             'destaque' => isset($_POST['destaque']) ? 1 : 0,
             'ativo' => isset($_POST['ativo']) ? 1 : 0,
+<<<<<<< HEAD
             'categoria_id' => !empty($_POST['categoria_id']) ? (int)$_POST['categoria_id'] : null,
         ];
 
+=======
+            'categoria_id' => $_POST['categoria_id'] ?: null,
+            'tags' => trim($_POST['tags'] ?? ''),
+            'seo_title' => trim($_POST['seo_title'] ?? ''),
+            'seo_description' => trim($_POST['seo_description'] ?? ''),
+            'seo_keywords' => trim($_POST['seo_keywords'] ?? ''),
+        ];
+        
+>>>>>>> 8561693cd0ec14eb8341364e3af39ea63aae5359
         if (empty($dados['nome'])) {
             set_flash('error', 'Nome do produto e obrigatorio');
         } else {
@@ -42,6 +73,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                         $dados['imagem_principal'] = $upload;
                     }
                 }
+<<<<<<< HEAD
 
                 // Processar imagens adicionais (campo TEXT 'imagens' no banco)
                 $imagens_adicionais = [];
@@ -66,6 +98,9 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                     }
                 }
 
+=======
+                
+>>>>>>> 8561693cd0ec14eb8341364e3af39ea63aae5359
                 if ($id) {
                     $dados['slug'] = unique_slug('produtos', $dados['slug'], $id);
                     $fields = [];
@@ -75,25 +110,60 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                         $values[] = $v;
                     }
                     $values[] = $id;
+<<<<<<< HEAD
 
                     db()->prepare("UPDATE " . table('produtos') . " SET " . implode(', ', $fields) . " WHERE id = ?")
                         ->execute($values);
 
+=======
+                    
+                    db()->prepare("UPDATE " . table('produtos') . " SET " . implode(', ', $fields) . " WHERE id = ?")
+                        ->execute($values);
+                    
+>>>>>>> 8561693cd0ec14eb8341364e3af39ea63aae5359
                     log_activity('update', 'produtos', "Produto #{$id} atualizado");
                     set_flash('success', 'Produto atualizado com sucesso!');
                 } else {
                     $dados['slug'] = unique_slug('produtos', $dados['slug']);
                     $cols = implode(', ', array_keys($dados));
                     $placeholders = implode(', ', array_fill(0, count($dados), '?'));
+<<<<<<< HEAD
 
                     db()->prepare("INSERT INTO " . table('produtos') . " ({$cols}) VALUES ({$placeholders})")
                         ->execute(array_values($dados));
 
+=======
+                    
+                    db()->prepare("INSERT INTO " . table('produtos') . " ({$cols}) VALUES ({$placeholders})")
+                        ->execute(array_values($dados));
+                    
+>>>>>>> 8561693cd0ec14eb8341364e3af39ea63aae5359
                     $id = db()->lastInsertId();
                     log_activity('create', 'produtos', "Produto #{$id} criado");
                     set_flash('success', 'Produto criado com sucesso!');
                 }
+<<<<<<< HEAD
 
+=======
+                
+                if (!empty($_FILES['imagens']['name'][0])) {
+                    foreach ($_FILES['imagens']['tmp_name'] as $i => $tmp) {
+                        if ($_FILES['imagens']['error'][$i] === UPLOAD_ERR_OK) {
+                            $fake_file = [
+                                'name' => $_FILES['imagens']['name'][$i],
+                                'tmp_name' => $tmp,
+                                'error' => 0
+                            ];
+                            $upload = handle_upload($fake_file, 'produtos');
+                            if ($upload) {
+                                db()->prepare("INSERT INTO " . table('produto_imagens') . " (produto_id, imagem) VALUES (?, ?)")
+                                    ->execute([$id, $upload]);
+                            }
+                        }
+                    }
+                }
+                
+>>>>>>> 8561693cd0ec14eb8341364e3af39ea63aae5359
                 header('Location: produtos.php');
                 exit;
             } catch (Exception $e) {
@@ -106,6 +176,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 // Deletar
 if ($action === 'delete' && $id) {
     try {
+<<<<<<< HEAD
         $prod = db()->prepare("SELECT imagem_principal, imagens FROM " . table('produtos') . " WHERE id = ?");
         $prod->execute([$id]);
         $p = $prod->fetch();
@@ -122,6 +193,22 @@ if ($action === 'delete' && $id) {
             }
         }
 
+=======
+        $prod = db()->prepare("SELECT imagem_principal FROM " . table('produtos') . " WHERE id = ?");
+        $prod->execute([$id]);
+        $p = $prod->fetch();
+        
+        if ($p && $p['imagem_principal']) {
+            delete_upload($p['imagem_principal']);
+        }
+        
+        $imgs = db()->prepare("SELECT imagem FROM " . table('produto_imagens') . " WHERE produto_id = ?");
+        $imgs->execute([$id]);
+        foreach ($imgs->fetchAll() as $img) {
+            delete_upload($img['imagem']);
+        }
+        
+>>>>>>> 8561693cd0ec14eb8341364e3af39ea63aae5359
         db()->prepare("DELETE FROM " . table('produtos') . " WHERE id = ?")->execute([$id]);
         log_activity('delete', 'produtos', "Produto #{$id} excluido");
         set_flash('success', 'Produto excluido com sucesso!');
@@ -132,12 +219,43 @@ if ($action === 'delete' && $id) {
     exit;
 }
 
+<<<<<<< HEAD
 // Buscar produto para editar
 $produto = null;
+=======
+// Deletar imagem
+if ($action === 'delete_img' && isset($_GET['img_id'])) {
+    try {
+        $img = db()->prepare("SELECT * FROM " . table('produto_imagens') . " WHERE id = ?");
+        $img->execute([(int)$_GET['img_id']]);
+        $i = $img->fetch();
+        if ($i) {
+            delete_upload($i['imagem']);
+            db()->prepare("DELETE FROM " . table('produto_imagens') . " WHERE id = ?")->execute([$i['id']]);
+            set_flash('success', 'Imagem removida');
+        }
+    } catch (Exception $e) {}
+    header('Location: produtos.php?action=edit&id=' . $id);
+    exit;
+}
+
+// Buscar produto para editar
+$produto = null;
+$imagens = [];
+>>>>>>> 8561693cd0ec14eb8341364e3af39ea63aae5359
 if ($action === 'edit' && $id) {
     $stmt = db()->prepare("SELECT * FROM " . table('produtos') . " WHERE id = ?");
     $stmt->execute([$id]);
     $produto = $stmt->fetch();
+<<<<<<< HEAD
+=======
+    
+    if ($produto) {
+        $stmt = db()->prepare("SELECT * FROM " . table('produto_imagens') . " WHERE produto_id = ? ORDER BY ordem");
+        $stmt->execute([$id]);
+        $imagens = $stmt->fetchAll();
+    }
+>>>>>>> 8561693cd0ec14eb8341364e3af39ea63aae5359
 }
 
 // Listar
@@ -148,7 +266,11 @@ $page = isset($_GET['page']) ? max(1, (int)$_GET['page']) : 1;
 $where = ["1=1"];
 $params = [];
 if ($busca) {
+<<<<<<< HEAD
     $where[] = "(nome LIKE ? OR sku LIKE ?)";
+=======
+    $where[] = "(p.nome LIKE ? OR p.sku LIKE ?)";
+>>>>>>> 8561693cd0ec14eb8341364e3af39ea63aae5359
     $like = "%{$busca}%";
     $params = [$like, $like];
 }
@@ -163,6 +285,11 @@ $stmt->execute($params);
 $total = (int) $stmt->fetchColumn();
 
 $pagination = paginate($total, $page, 15);
+<<<<<<< HEAD
+=======
+
+// CORRECAO: Garantir offset nao negativo
+>>>>>>> 8561693cd0ec14eb8341364e3af39ea63aae5359
 $offset = max(0, $pagination['offset']);
 
 $stmt = db()->prepare("SELECT p.*, c.nome as categoria_nome 
@@ -194,9 +321,15 @@ if ($action === 'edit' || $action === 'new'):
         <form method="POST" action="" enctype="multipart/form-data">
             <input type="hidden" name="acao" value="salvar">
             <?php if ($id): ?>
+<<<<<<< HEAD
             <input type="hidden" name="imagem_atual" value="<?php echo htmlspecialchars($produto['imagem_principal'] ?? ''); ?>">
             <?php endif; ?>
 
+=======
+            <input type="hidden" name="imagem_atual" value="<?php echo $produto['imagem_principal'] ?? ''; ?>">
+            <?php endif; ?>
+            
+>>>>>>> 8561693cd0ec14eb8341364e3af39ea63aae5359
             <div class="form-row">
                 <div class="form-group">
                     <label for="nome">Nome do Produto *</label>
@@ -207,7 +340,11 @@ if ($action === 'edit' || $action === 'new'):
                     <input type="text" id="sku" name="sku" value="<?php echo sanitize($produto['sku'] ?? ''); ?>">
                 </div>
             </div>
+<<<<<<< HEAD
 
+=======
+            
+>>>>>>> 8561693cd0ec14eb8341364e3af39ea63aae5359
             <div class="form-row">
                 <div class="form-group">
                     <label for="categoria_id">Categoria</label>
@@ -220,18 +357,36 @@ if ($action === 'edit' || $action === 'new'):
                         <?php endforeach; ?>
                     </select>
                 </div>
+<<<<<<< HEAD
             </div>
 
+=======
+                <div class="form-group">
+                    <label for="tags">Tags</label>
+                    <input type="text" id="tags" name="tags" value="<?php echo sanitize($produto['tags'] ?? ''); ?>" placeholder="tag1, tag2, tag3">
+                </div>
+            </div>
+            
+>>>>>>> 8561693cd0ec14eb8341364e3af39ea63aae5359
             <div class="form-group">
                 <label for="descricao_curta">Descricao Curta</label>
                 <textarea id="descricao_curta" name="descricao_curta" rows="2"><?php echo sanitize($produto['descricao_curta'] ?? ''); ?></textarea>
             </div>
+<<<<<<< HEAD
 
             <div class="form-group">
                 <label for="descricao_completa">Descricao Completa</label>
                 <textarea id="descricao_completa" name="descricao_completa" rows="6"><?php echo sanitize($produto['descricao'] ?? ''); ?></textarea>
             </div>
 
+=======
+            
+            <div class="form-group">
+                <label for="descricao_completa">Descricao Completa</label>
+                <textarea id="descricao_completa" name="descricao_completa" rows="6"><?php echo sanitize($produto['descricao_completa'] ?? ''); ?></textarea>
+            </div>
+            
+>>>>>>> 8561693cd0ec14eb8341364e3af39ea63aae5359
             <div class="form-row-3">
                 <div class="form-group">
                     <label for="preco">Preco (R$)</label>
@@ -241,10 +396,25 @@ if ($action === 'edit' || $action === 'new'):
                     <label for="preco_promocional">Preco Promocional (R$)</label>
                     <input type="text" id="preco_promocional" name="preco_promocional" value="<?php echo $produto['preco_promocional'] ?? ''; ?>" placeholder="0,00">
                 </div>
+<<<<<<< HEAD
             </div>
 
             <div class="form-row-3">
                 <div class="form-group">
+=======
+                <div class="form-group">
+                    <label for="custo">Custo (R$)</label>
+                    <input type="text" id="custo" name="custo" value="<?php echo $produto['custo'] ?? ''; ?>" placeholder="0,00">
+                </div>
+            </div>
+            
+            <div class="form-row-3">
+                <div class="form-group">
+                    <label for="unidade">Unidade</label>
+                    <input type="text" id="unidade" name="unidade" value="<?php echo sanitize($produto['unidade'] ?? 'un'); ?>">
+                </div>
+                <div class="form-group">
+>>>>>>> 8561693cd0ec14eb8341364e3af39ea63aae5359
                     <label for="quantidade_estoque">Estoque Atual</label>
                     <input type="number" id="quantidade_estoque" name="quantidade_estoque" value="<?php echo $produto['quantidade_estoque'] ?? 0; ?>">
                 </div>
@@ -253,7 +423,11 @@ if ($action === 'edit' || $action === 'new'):
                     <input type="number" id="estoque_minimo" name="estoque_minimo" value="<?php echo $produto['estoque_minimo'] ?? 0; ?>">
                 </div>
             </div>
+<<<<<<< HEAD
 
+=======
+            
+>>>>>>> 8561693cd0ec14eb8341364e3af39ea63aae5359
             <div class="form-row">
                 <div class="form-group">
                     <label for="imagem">Imagem Principal</label>
@@ -265,6 +439,7 @@ if ($action === 'edit' || $action === 'new'):
                 <div class="form-group">
                     <label for="imagens">Imagens Adicionais</label>
                     <input type="file" id="imagens" name="imagens[]" accept="image/*" multiple>
+<<<<<<< HEAD
                     <?php 
                     $imgs_extra = [];
                     if (!empty($produto['imagens'])) {
@@ -276,15 +451,35 @@ if ($action === 'edit' || $action === 'new'):
                         <?php foreach ($imgs_extra as $idx => $img): ?>
                         <div style="position:relative;">
                             <img src="<?php echo uploads_url($img); ?>" alt="" style="width:80px;height:60px;object-fit:cover;border-radius:6px;">
+=======
+                    <?php if (!empty($imagens)): ?>
+                    <div style="display:flex;gap:8px;flex-wrap:wrap;margin-top:8px;">
+                        <?php foreach ($imagens as $img): ?>
+                        <div style="position:relative;">
+                            <img src="<?php echo uploads_url($img['imagem']); ?>" alt="" style="width:80px;height:60px;object-fit:cover;border-radius:6px;">
+                            <a href="?action=delete_img&id=<?php echo $id; ?>&img_id=<?php echo $img['id']; ?>" class="btn-delete" style="position:absolute;top:-4px;right:-4px;width:20px;height:20px;background:var(--danger);color:white;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:10px;text-decoration:none;" onclick="return confirm('Remover imagem?')">&times;</a>
+>>>>>>> 8561693cd0ec14eb8341364e3af39ea63aae5359
                         </div>
                         <?php endforeach; ?>
                     </div>
                     <?php endif; ?>
                 </div>
             </div>
+<<<<<<< HEAD
 
             <div class="form-row">
                 <div class="form-group">
+=======
+            
+            <div class="form-row">
+                <div class="form-group">
+                    <label>SEO</label>
+                    <input type="text" name="seo_title" value="<?php echo sanitize($produto['seo_title'] ?? ''); ?>" placeholder="Titulo SEO">
+                    <input type="text" name="seo_description" value="<?php echo sanitize($produto['seo_description'] ?? ''); ?>" placeholder="Descricao SEO" style="margin-top:8px;">
+                    <input type="text" name="seo_keywords" value="<?php echo sanitize($produto['seo_keywords'] ?? ''); ?>" placeholder="Keywords SEO" style="margin-top:8px;">
+                </div>
+                <div class="form-group">
+>>>>>>> 8561693cd0ec14eb8341364e3af39ea63aae5359
                     <label>Opcoes</label>
                     <div class="form-check">
                         <input type="checkbox" id="destaque" name="destaque" <?php echo checked(($produto['destaque'] ?? 0) == 1); ?>>
@@ -296,7 +491,11 @@ if ($action === 'edit' || $action === 'new'):
                     </div>
                 </div>
             </div>
+<<<<<<< HEAD
 
+=======
+            
+>>>>>>> 8561693cd0ec14eb8341364e3af39ea63aae5359
             <div class="form-actions" style="margin-top:24px;padding-top:20px;border-top:1px solid var(--gray-200);">
                 <a href="produtos.php" class="btn btn-secondary">Cancelar</a>
                 <button type="submit" class="btn btn-primary"><i class="fas fa-save"></i> Salvar Produto</button>
@@ -342,6 +541,10 @@ if ($action === 'edit' || $action === 'new'):
                     <th>Nome / SKU</th>
                     <th>Categoria</th>
                     <th>Preco</th>
+<<<<<<< HEAD
+=======
+                    <th>Dimensoes</th>
+>>>>>>> 8561693cd0ec14eb8341364e3af39ea63aae5359
                     <th>Estoque</th>
                     <th>Status</th>
                     <th width="120">Acoes</th>
@@ -361,6 +564,18 @@ if ($action === 'edit' || $action === 'new'):
                     </td>
                     <td><?php echo sanitize($p['categoria_nome'] ?? '-'); ?></td>
                     <td>
+<<<<<<< HEAD
+=======
+                        <?php 
+                        $dims = [];
+                        if (isset($p['largura']) && $p['largura'] > 0) $dims[] = 'L: ' . number_format((float)$p['largura'], 2, ',', '.') . 'm';
+                        if (isset($p['altura']) && $p['altura'] > 0) $dims[] = 'A: ' . number_format((float)$p['altura'], 2, ',', '.') . 'm';
+                        if (isset($p['mt2']) && $p['mt2'] > 0) $dims[] = number_format((float)$p['mt2'], 2, ',', '.') . 'm²';
+                        echo !empty($dims) ? implode('<br>', $dims) : '-';
+                        ?>
+                    </td>
+                    <td>
+>>>>>>> 8561693cd0ec14eb8341364e3af39ea63aae5359
                         <?php if ($p['preco_promocional']): ?>
                         <span style="text-decoration:line-through;color:var(--gray-400);font-size:0.8125rem;"><?php echo format_currency((float)$p['preco']); ?></span><br>
                         <strong style="color:var(--primary);"><?php echo format_currency((float)$p['preco_promocional']); ?></strong>
@@ -384,7 +599,11 @@ if ($action === 'edit' || $action === 'new'):
                     <td>
                         <div class="actions">
                             <a href="produtos.php?action=edit&id=<?php echo $p['id']; ?>" class="btn btn-sm btn-secondary btn-icon" title="Editar"><i class="fas fa-edit"></i></a>
+<<<<<<< HEAD
                             <a href="?action=delete&id=<?php echo $p['id']; ?>" class="btn btn-sm btn-danger btn-icon btn-delete" title="Excluir" onclick="return confirm('Excluir produto?')"><i class="fas fa-trash"></i></a>
+=======
+                            <a href="?action=delete&id=<?php echo $p['id']; ?>" class="btn btn-sm btn-danger btn-icon btn-delete" title="Excluir"><i class="fas fa-trash"></i></a>
+>>>>>>> 8561693cd0ec14eb8341364e3af39ea63aae5359
                         </div>
                     </td>
                 </tr>
@@ -392,7 +611,11 @@ if ($action === 'edit' || $action === 'new'):
             </tbody>
         </table>
     </div>
+<<<<<<< HEAD
 
+=======
+    
+>>>>>>> 8561693cd0ec14eb8341364e3af39ea63aae5359
     <?php if ($pagination['total_pages'] > 1): ?>
     <div class="pagination-wrap">
         <?php 

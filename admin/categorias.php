@@ -1,7 +1,10 @@
 <?php
 /**
  * SiteCatalogo - Categorias (CRUD)
+<<<<<<< HEAD
  * CORRIGIDO: Removidas colunas icone e parent_id que nao existem no banco
+=======
+>>>>>>> 8561693cd0ec14eb8341364e3af39ea63aae5359
  */
 require_once __DIR__ . '/includes/functions.php';
 $page_title = 'Categorias';
@@ -16,8 +19,15 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             'nome' => trim($_POST['nome'] ?? ''),
             'slug' => slugify(trim($_POST['nome'] ?? '')),
             'descricao' => trim($_POST['descricao'] ?? ''),
+<<<<<<< HEAD
             'ordem' => (int)($_POST['ordem'] ?? 0),
             'ativo' => isset($_POST['ativo']) ? 1 : 0,
+=======
+            'icone' => trim($_POST['icone'] ?? ''),
+            'ordem' => (int)($_POST['ordem'] ?? 0),
+            'ativo' => isset($_POST['ativo']) ? 1 : 0,
+            'parent_id' => $_POST['parent_id'] ?: null,
+>>>>>>> 8561693cd0ec14eb8341364e3af39ea63aae5359
         ];
         if (empty($dados['nome'])) {
             set_flash('error', 'Nome obrigatorio');
@@ -70,7 +80,11 @@ if ($action === 'edit' && $id) {
     $stmt = db()->prepare("SELECT * FROM " . table('categorias') . " WHERE id = ?"); $stmt->execute([$id]); $categoria = $stmt->fetch();
 }
 
+<<<<<<< HEAD
 $categorias = db()->query("SELECT * FROM " . table('categorias') . " ORDER BY ordem, nome")->fetchAll();
+=======
+$categorias = db()->query("SELECT c.*, p.nome as parent_nome FROM " . table('categorias') . " c LEFT JOIN " . table('categorias') . " p ON c.parent_id = p.id ORDER BY c.ordem, c.nome")->fetchAll();
+>>>>>>> 8561693cd0ec14eb8341364e3af39ea63aae5359
 
 require_once __DIR__ . '/includes/header.php';
 
@@ -84,15 +98,29 @@ if ($action === 'edit' || $action === 'new'):
     <div class="card-body">
         <form method="POST" enctype="multipart/form-data">
             <input type="hidden" name="acao" value="salvar">
+<<<<<<< HEAD
             <?php if ($id): ?><input type="hidden" name="imagem_atual" value="<?php echo htmlspecialchars($categoria['imagem'] ?? ''); ?>"><?php endif; ?>
+=======
+            <?php if ($id): ?><input type="hidden" name="imagem_atual" value="<?php echo $categoria['imagem'] ?? ''; ?>"><?php endif; ?>
+>>>>>>> 8561693cd0ec14eb8341364e3af39ea63aae5359
             <div class="form-row">
                 <div class="form-group">
                     <label>Nome *</label>
                     <input type="text" name="nome" value="<?php echo sanitize($categoria['nome'] ?? ''); ?>" required>
                 </div>
                 <div class="form-group">
+<<<<<<< HEAD
                     <label>Ordem</label>
                     <input type="number" name="ordem" value="<?php echo $categoria['ordem'] ?? 0; ?>">
+=======
+                    <label>Categoria Pai</label>
+                    <select name="parent_id">
+                        <option value="">Nenhuma</option>
+                        <?php foreach ($categorias as $c): if ($c['id'] == $id) continue; ?>
+                        <option value="<?php echo $c['id']; ?>" <?php echo selected($categoria['parent_id'] ?? '', $c['id']); ?>><?php echo sanitize($c['nome']); ?></option>
+                        <?php endforeach; ?>
+                    </select>
+>>>>>>> 8561693cd0ec14eb8341364e3af39ea63aae5359
                 </div>
             </div>
             <div class="form-group">
@@ -101,6 +129,19 @@ if ($action === 'edit' || $action === 'new'):
             </div>
             <div class="form-row">
                 <div class="form-group">
+<<<<<<< HEAD
+=======
+                    <label>Icone (classe FontAwesome)</label>
+                    <input type="text" name="icone" value="<?php echo sanitize($categoria['icone'] ?? ''); ?>" placeholder="fa-box">
+                </div>
+                <div class="form-group">
+                    <label>Ordem</label>
+                    <input type="number" name="ordem" value="<?php echo $categoria['ordem'] ?? 0; ?>">
+                </div>
+            </div>
+            <div class="form-row">
+                <div class="form-group">
+>>>>>>> 8561693cd0ec14eb8341364e3af39ea63aae5359
                     <label>Imagem</label>
                     <input type="file" name="imagem" accept="image/*">
                     <?php if (!empty($categoria['imagem'])): ?>
@@ -126,17 +167,31 @@ if ($action === 'edit' || $action === 'new'):
 <div class="card">
     <div class="table-responsive">
         <table class="table">
+<<<<<<< HEAD
             <thead><tr><th>Nome</th><th>Slug</th><th>Ordem</th><th>Status</th><th width="100">Acoes</th></tr></thead>
             <tbody>
                 <?php foreach ($categorias as $c): ?>
                 <tr>
                     <td><?php echo sanitize($c['nome']); ?></td>
                     <td><code><?php echo sanitize($c['slug']); ?></code></td>
+=======
+            <thead><tr><th>Nome</th><th>Slug</th><th>Pai</th><th>Ordem</th><th>Status</th><th width="100">Acoes</th></tr></thead>
+            <tbody>
+                <?php foreach ($categorias as $c): ?>
+                <tr>
+                    <td><i class="fas <?php echo $c['icone'] ?: 'fa-tag'; ?>" style="color:var(--primary);margin-right:8px;"></i><?php echo sanitize($c['nome']); ?></td>
+                    <td><code><?php echo sanitize($c['slug']); ?></code></td>
+                    <td><?php echo sanitize($c['parent_nome'] ?? '-'); ?></td>
+>>>>>>> 8561693cd0ec14eb8341364e3af39ea63aae5359
                     <td><?php echo $c['ordem']; ?></td>
                     <td><span class="badge-status status-<?php echo $c['ativo'] ? 'ativo' : 'inativo'; ?>"><?php echo $c['ativo'] ? 'Ativo' : 'Inativo'; ?></span></td>
                     <td class="actions">
                         <a href="categorias.php?action=edit&id=<?php echo $c['id']; ?>" class="btn btn-sm btn-secondary btn-icon"><i class="fas fa-edit"></i></a>
+<<<<<<< HEAD
                         <a href="?action=delete&id=<?php echo $c['id']; ?>" class="btn btn-sm btn-danger btn-icon btn-delete" onclick="return confirm('Excluir categoria?')"><i class="fas fa-trash"></i></a>
+=======
+                        <a href="?action=delete&id=<?php echo $c['id']; ?>" class="btn btn-sm btn-danger btn-icon btn-delete"><i class="fas fa-trash"></i></a>
+>>>>>>> 8561693cd0ec14eb8341364e3af39ea63aae5359
                     </td>
                 </tr>
                 <?php endforeach; ?>
@@ -145,4 +200,8 @@ if ($action === 'edit' || $action === 'new'):
     </div>
 </div>
 <?php endif; ?>
+<<<<<<< HEAD
 <?php require_once __DIR__ . '/includes/footer.php'; ?>
+=======
+<?php require_once __DIR__ . '/includes/footer.php'; ?>
+>>>>>>> 8561693cd0ec14eb8341364e3af39ea63aae5359

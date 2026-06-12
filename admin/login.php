@@ -22,6 +22,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         $error = 'Preencha todos os campos.';
     } else {
         try {
+<<<<<<< HEAD
             // Usa 'email' como campo de login
             $stmt = db()->prepare("SELECT * FROM " . table('usuarios') . " WHERE email = ? AND status = 'ativo' LIMIT 1");
             $stmt->execute([$login]);
@@ -64,6 +65,29 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 } else {
                     $error = 'Login ou senha incorretos.';
                 }
+=======
+            $stmt = db()->prepare("SELECT * FROM " . table('usuarios') . " WHERE login = ? AND status = 'ativo' LIMIT 1");
+            $stmt->execute([$login]);
+            $user = $stmt->fetch();
+            
+            if ($user && password_verify($senha, $user['senha'])) {
+                // Login ok
+                $_SESSION['admin_id'] = $user['id'];
+                $_SESSION['admin_nome'] = $user['nome_completo'];
+                $_SESSION['admin_login'] = $user['login'];
+                $_SESSION['admin_email'] = $user['email'];
+                $_SESSION['admin_nivel'] = $user['nivel'];
+                $_SESSION['admin_avatar'] = $user['avatar'];
+                
+                // Atualizar ultimo acesso
+                db()->prepare("UPDATE " . table('usuarios') . " SET ultimo_acesso = NOW() WHERE id = ?")
+                    ->execute([$user['id']]);
+                
+                log_activity('login', 'auth', "Usuario {$user['login']} fez login");
+                
+                header('Location: ./');
+                exit;
+>>>>>>> 8561693cd0ec14eb8341364e3af39ea63aae5359
             } else {
                 $error = 'Login ou senha incorretos.';
             }
@@ -104,10 +128,17 @@ $site_name = get_config('site_name', 'SiteCatalogo');
             
             <form method="POST" action="" class="login-form">
                 <div class="form-group">
+<<<<<<< HEAD
                     <label for="login">E-mail</label>
                     <div class="input-icon">
                         <i class="fas fa-envelope"></i>
                         <input type="email" id="login" name="login" required autofocus placeholder="Seu e-mail" value="<?php echo htmlspecialchars($_POST['login'] ?? ''); ?>">
+=======
+                    <label for="login">Usuario</label>
+                    <div class="input-icon">
+                        <i class="fas fa-user"></i>
+                        <input type="text" id="login" name="login" required autofocus placeholder="Seu usuario">
+>>>>>>> 8561693cd0ec14eb8341364e3af39ea63aae5359
                     </div>
                 </div>
                 
@@ -130,4 +161,8 @@ $site_name = get_config('site_name', 'SiteCatalogo');
         </div>
     </div>
 </body>
+<<<<<<< HEAD
 </html>
+=======
+</html>
+>>>>>>> 8561693cd0ec14eb8341364e3af39ea63aae5359

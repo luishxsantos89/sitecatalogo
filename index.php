@@ -293,6 +293,10 @@ if ($busca) {
     </style>
 </head>
 <body>
+<<<<<<< HEAD
+=======
+    <!-- Header -->
+>>>>>>> 8561693cd0ec14eb8341364e3af39ea63aae5359
     <header class="site-header">
         <div class="container">
             <div class="header-inner">
@@ -459,7 +463,11 @@ if ($busca) {
                                             <span class="price-consult">Sob consulta</span>
                                         <?php endif; ?>
                                     </div>
+<<<<<<< HEAD
                                     <button type="button" class="btn-add-cart" onclick="addToCart(<?php echo $prod['id']; ?>, '<?php echo htmlspecialchars(addslashes($prod['nome']), ENT_QUOTES, 'UTF-8'); ?>', <?php echo $mostrar_preco ? ($tem_promo ? $prod['preco_promocional'] : ($tem_preco ? $prod['preco'] : 0)) : 0; ?>)">
+=======
+                                    <button type="button" class="btn-add-cart" onclick="addToCart(<?php echo $prod['id']; ?>, '<?php echo addslashes($prod['nome']); ?>', <?php echo $mostrar_preco ? ($tem_promo ? $prod['preco_promocional'] : ($tem_preco ? $prod['preco'] : 0)) : 0; ?>)">
+>>>>>>> 8561693cd0ec14eb8341364e3af39ea63aae5359
                                         <i class="fas fa-plus"></i>
                                     </button>
                                 </div>
@@ -484,6 +492,10 @@ if ($busca) {
         </div>
     </main>
 
+<<<<<<< HEAD
+=======
+    <!-- MODAL PRODUTO -->
+>>>>>>> 8561693cd0ec14eb8341364e3af39ea63aae5359
     <div class="modal-produto-overlay" id="modalProdutoOverlay" onclick="fecharProduto(event)">
         <div class="modal-produto" id="modalProduto" onclick="event.stopPropagation()">
             <button class="modal-produto-close" onclick="fecharProduto()"><i class="fas fa-times"></i></button>
@@ -556,7 +568,11 @@ if ($busca) {
                         </div>
                         
                         <div class="modal-produto-btns">
+<<<<<<< HEAD
                             <button class="btn btn-add-orcamento" onclick="addToCart(<?php echo $produto_modal['id']; ?>, '<?php echo htmlspecialchars(addslashes($produto_modal['nome']), ENT_QUOTES, 'UTF-8'); ?>', <?php echo $mostrar_preco ? (($produto_modal['preco_promocional'] && $produto_modal['preco_promocional'] > 0) ? $produto_modal['preco_promocional'] : ($produto_modal['preco'] > 0 ? $produto_modal['preco'] : 0)) : 0; ?>); fecharProduto(); toggleCart();">
+=======
+                            <button class="btn btn-add-orcamento" onclick="addToCart(<?php echo $produto_modal['id']; ?>, '<?php echo addslashes($produto_modal['nome']); ?>', <?php echo $mostrar_preco ? (($produto_modal['preco_promocional'] && $produto_modal['preco_promocional'] > 0) ? $produto_modal['preco_promocional'] : ($produto_modal['preco'] > 0 ? $produto_modal['preco'] : 0)) : 0; ?>); fecharProduto(); toggleCart();">
+>>>>>>> 8561693cd0ec14eb8341364e3af39ea63aae5359
                                 <i class="fas fa-plus"></i> Adicionar ao Orcamento
                             </button>
                             <?php if ($whatsapp): ?>
@@ -577,6 +593,10 @@ if ($busca) {
         </div>
     </div>
 
+<<<<<<< HEAD
+=======
+    <!-- BOTÕES FLUTUANTES MOBILE -->
+>>>>>>> 8561693cd0ec14eb8341364e3af39ea63aae5359
     <div class="mobile-float-bar">
         <button type="button" class="mobile-float-btn mobile-float-categoria" onclick="toggleMobileSidebar()">
             <i class="fas fa-th-large"></i>
@@ -669,6 +689,25 @@ if ($busca) {
     </style>
 
     <script>
+<<<<<<< HEAD
+=======
+    // Sincronizar contador do carrinho mobile
+    function updateMobileCartCount() {
+        const count = cart.reduce((sum, item) => sum + item.qtd, 0);
+        const el = document.getElementById('mobileCartCount');
+        if (el) {
+            el.textContent = count;
+            el.style.display = count > 0 ? 'flex' : 'none';
+        }
+    }
+    // Sobrescrever updateCartUI para incluir mobile
+    const originalUpdateCartUI = updateCartUI;
+    updateCartUI = function() {
+        originalUpdateCartUI();
+        updateMobileCartCount();
+    };
+
+>>>>>>> 8561693cd0ec14eb8341364e3af39ea63aae5359
     // Toggle sidebar mobile
     function toggleMobileSidebar() {
         const sidebar = document.querySelector('.sidebar');
@@ -681,6 +720,10 @@ if ($busca) {
     }
     </script>
 
+<<<<<<< HEAD
+=======
+    <!-- CART -->
+>>>>>>> 8561693cd0ec14eb8341364e3af39ea63aae5359
     <div class="cart-overlay" id="cartOverlay" onclick="toggleCart()"></div>
     <div class="cart-sidebar" id="cartSidebar">
         <div class="cart-header">
@@ -710,6 +753,10 @@ if ($busca) {
         <i class="fas fa-shopping-bag"></i><span class="cart-count" id="cartCount">0</span>
     </button>
 
+<<<<<<< HEAD
+=======
+    <!-- ORCAMENTO MODAL -->
+>>>>>>> 8561693cd0ec14eb8341364e3af39ea63aae5359
     <div class="modal-overlay" id="modalOverlay"></div>
     <div class="modal" id="orcamentoModal">
         <div class="modal-header">
@@ -742,12 +789,20 @@ if ($busca) {
                     <path d="M22 32l7 7 13-13" stroke="#10b981" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" fill="none"/>
                 </svg>
                 <h3>Orcamento enviado com sucesso!</h3>
+<<<<<<< HEAD
                 <p>Entraremos em contato em breve pelo WhatsApp.</p>
+=======
+                <p>Entraremos em contato em breve.</p>
+>>>>>>> 8561693cd0ec14eb8341364e3af39ea63aae5359
                 <button class="btn btn-secondary" onclick="closeModal()">Fechar</button>
             </div>
         </div>
     </div>
 
+<<<<<<< HEAD
+=======
+    <!-- CONTATO -->
+>>>>>>> 8561693cd0ec14eb8341364e3af39ea63aae5359
     <section class="contact-section" style="background: #f8fafc; padding: 60px 0; border-top: 1px solid #e2e8f0;">
         <div class="container">
             <div style="text-align: center; margin-bottom: 40px;">
@@ -823,6 +878,10 @@ if ($busca) {
         </div>
     </section>
 
+<<<<<<< HEAD
+=======
+    <!-- FOOTER -->
+>>>>>>> 8561693cd0ec14eb8341364e3af39ea63aae5359
     <footer class="site-footer" style="background: #1e293b; color: #94a3b8; padding: 0;">
         <div style="padding: 48px 0 32px;">
             <div class="container">
@@ -872,7 +931,11 @@ if ($busca) {
         <div style="border-top: 1px solid #334155; padding: 20px 0;">
             <div class="container">
                 <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 12px;">
+<<<<<<< HEAD
                     <p style="margin: 0; font-size: 0.8125rem;">© <?php echo date('Y'); ?> <?php echo sanitize($site_name); ?>. Todos os direitos reservados.</p>
+=======
+                    <p style="margin: 0; font-size: 0.8125rem;">&copy; <?php echo date('Y'); ?> <?php echo sanitize($site_name); ?>. Todos os direitos reservados.</p>
+>>>>>>> 8561693cd0ec14eb8341364e3af39ea63aae5359
                     <p style="margin: 0; font-size: 0.75rem; color: #64748b;">Desenvolvido com <i class="fas fa-heart" style="color: #ef4444;"></i> SiteCatalogo</p>
                 </div>
             </div>
@@ -909,6 +972,7 @@ if ($busca) {
     function updateCartUI() {
         const count = cart.reduce((sum, item) => sum + item.qtd, 0);
         document.getElementById('cartCount').textContent = count;
+<<<<<<< HEAD
         
         // Correcao: O contador mobile agora eh atualizado aqui dentro com seguranca
         const mobileEl = document.getElementById('mobileCartCount');
@@ -917,6 +981,8 @@ if ($busca) {
             mobileEl.style.display = count > 0 ? 'flex' : 'none';
         }
         
+=======
+>>>>>>> 8561693cd0ec14eb8341364e3af39ea63aae5359
         const emptyEl = document.getElementById('cartEmpty');
         const itemsEl = document.getElementById('cartItems');
         const footerEl = document.getElementById('cartFooter');
@@ -945,11 +1011,15 @@ if ($busca) {
         const form = e.target;
         const data = new FormData(form);
         data.append('itens', JSON.stringify(cart));
+<<<<<<< HEAD
         
+=======
+>>>>>>> 8561693cd0ec14eb8341364e3af39ea63aae5359
         fetch('api/orcamento.php', { method: 'POST', body: data })
         .then(r => r.json())
         .then(resp => {
             if (resp.success) {
+<<<<<<< HEAD
                 // Correcao: Alem de salvar na API, agora envia e abre direto no WhatsApp!
                 let texto = "<?php echo addslashes($orcamento_msg); ?>\n\n";
                 texto += "*DADOS DO CLIENTE:*\n";
@@ -989,6 +1059,14 @@ if ($busca) {
             }
         })
         .catch(err => { alert('Erro ao enviar. Verifique a conexao ou a configuracao da sua API.'); });
+=======
+                form.style.display = 'none';
+                document.getElementById('successMessage').style.display = 'block';
+                clearCart();
+            } else { alert('Erro: ' + (resp.message || 'Tente novamente')); }
+        })
+        .catch(err => { alert('Erro ao enviar. Tente novamente.'); });
+>>>>>>> 8561693cd0ec14eb8341364e3af39ea63aae5359
     }
     
     function escapeHtml(text) { const div = document.createElement('div'); div.textContent = text; return div.innerHTML; }
