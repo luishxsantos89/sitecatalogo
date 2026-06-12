@@ -1,0 +1,15 @@
+RewriteEngine On
+RewriteBase /admin/
+
+# Proteger arquivos sensíveis
+<FilesMatch "\.(sql|log|ini|env)$">
+    Order allow,deny
+    Deny from all
+</FilesMatch>
+
+# Desabilitar listagem de diretórios
+Options -Indexes
+
+# PHP settings
+php_value upload_max_filesize 10M
+php_value post_max_size 10M
